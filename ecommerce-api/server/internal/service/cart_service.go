@@ -114,6 +114,24 @@ func (s *CartService) AddItem(ctx context.Context, userID, productID, quantity i
 	return nil
 }
 
+// UpdateItemQuantity changes quantity on an item in the caller's cart.
+func (s *CartService) UpdateItemQuantity(ctx context.Context, userID, cartItemID, quantity int) error {
+	if quantity <= 0 || quantity > maxCartQuantity {
+		return fmt.Errorf("quantity exceeds maximum")
+	}
+	cart, err := s.cartRepo.GetByUserID(ctx, userID)
+	if err != nil || cart == nil {
+		return fmt.Errorf("cart item not found")
+	}
+	if err := s.cartRepo.UpdateItemQuantity(ctx, cart.ID, cartItemID, quantity); err != nil {
+		if err.Error() == "cart item not found" {
+			return err
+		}
+		return fmt.Errorf("failed to update cart item: %w", err)
+	}
+	return nil
+}
+
 // RemoveItem removes item from cart
 const maxCartQuantity = 100
 

@@ -244,8 +244,7 @@ func (r *CartRepositoryPort) AddItem(ctx context.Context, cartID, productID, qua
 }
 func (r *CartRepositoryPort) UpdateItemQuantity(ctx context.Context, cartID, cartItemID, quantity int) error {
 	_ = ctx
-	_ = cartID
-	return r.inner.UpdateItemQuantity(cartItemID, quantity)
+	return r.inner.UpdateItemQuantity(cartID, cartItemID, quantity)
 }
 func (r *CartRepositoryPort) RemoveItem(ctx context.Context, cartID, cartItemID int) error {
 	_ = ctx
