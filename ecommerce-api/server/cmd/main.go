@@ -86,6 +86,7 @@ func main() {
 		recover.New(),
 		logger.New(),
 		middleware.CORS(cfg.CORS.AllowedOrigins),
+		middleware.SecurityHeaders(),
 	)
 
 	app.Use(func(c *fiber.Ctx) error {
@@ -173,6 +174,7 @@ func main() {
 
 	protected.Get("/cart", cartHandler.GetCart)
 	protected.Post("/cart/items", cartHandler.AddItem)
+	protected.Put("/cart/items/:id", cartHandler.UpdateItem)
 	protected.Delete("/cart/items/:id", cartHandler.RemoveItem)
 	protected.Delete("/cart", cartHandler.ClearCart)
 

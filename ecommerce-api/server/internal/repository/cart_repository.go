@@ -221,14 +221,14 @@ func (r *CartRepository) GetCartItemByCartAndProduct(cartID, productID int) (*mo
 	return item, err
 }
 
-// UpdateItemQuantity updates cart item quantity
-func (r *CartRepository) UpdateItemQuantity(cartItemID, quantity int) error {
+// UpdateItemQuantity updates quantity only when the item belongs to cartID.
+func (r *CartRepository) UpdateItemQuantity(cartID, cartItemID, quantity int) error {
 	query := `
 		UPDATE cart_items
 		SET quantity = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $2
+		WHERE id = $2 AND cart_id = $3
 	`
-	result, err := r.db.Exec(query, quantity, cartItemID)
+	result, err := r.db.Exec(query, quantity, cartItemID, cartID)
 	if err != nil {
 		return err
 	}

@@ -117,6 +117,36 @@ func (h *CartHandler) AddItem(c *fiber.Ctx) error {
 	return utils.SuccessResponse(c, "Item added to cart successfully", cart)
 }
 
+// UpdateItem updates quantity for an item in the caller's cart.
+// PUT /api/cart/items/:id
+func (h *CartHandler) UpdateItem(c *fiber.Ctx) error {
+	userID, ok := middleware.GetUserID(c)
+	if !ok {
+		return utils.UnauthorizedResponse(c, "Unauthorized")
+	}
+	itemID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return utils.BadRequestResponse(c, "Invalid item ID")
+	}
+	var req struct {
+		Quantity int `json:"quantity"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return utils.BadRequestResponse(c, "Invalid request body")
+	}
+	if err := h.cartService.UpdateItemQuantity(c.Context(), userID, itemID, req.Quantity); err != nil {
+		if err.Error() == "cart item not found" {
+			return utils.NotFoundResponse(c, "Cart item not found")
+		}
+		return utils.BadRequestResponse(c, err.Error())
+	}
+	cart, err := h.cartService.GetCart(c.Context(), userID)
+	if err != nil {
+		return utils.InternalServerErrorResponse(c, "Failed to get updated cart")
+	}
+	return utils.SuccessResponse(c, "Cart item updated successfully", cart)
+}
+
 // RemoveItem removes item from cart
 // DELETE /api/cart/items/:id
 // Protected: Requires authentication
