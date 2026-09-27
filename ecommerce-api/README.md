@@ -151,6 +151,17 @@ See `.env.example` for every variable the app reads (`DB_*`, `SERVER_*`, `JWT_*`
 
 ---
 
+## OWASP controls
+
+These are application checks, not only CI scanners. See `docs/threat-model.md`.
+
+- **Broken access control:** `GET /api/orders/:id`, `GET /api/orders/number/:orderNumber`, and `POST /api/orders/:id/cancel` return 403 when the JWT user is not the order owner. Cart GET, `PUT /api/cart/items/:id`, and `DELETE /api/cart/items/:id` only touch the caller's cart (404 if the line belongs to someone else). Admin order status stays on `/api/admin` with the admin role.
+- **Brute force:** `POST /api/auth/login` and `POST /api/auth/register` (also under `/auth`) share an in-memory limit of 10 requests per minute per IP and email. The next call is HTTP 429. There is no Redis; a restart or a second process resets the counter.
+- **Security headers:** every response sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, and `Referrer-Policy: strict-origin-when-cross-origin`.
+- **CORS:** `.env.example` uses `CORS_ALLOWED_ORIGINS=*`. That is a lab shortcut. Any website can read public responses from a browser. Cookie credentials are not sent with `*`. The process refuses to start in production while the value is still `*`.
+
+---
+
 ## API Reference
 
 Auth routes are also available under `/auth/register` and `/auth/login`.
@@ -187,6 +198,7 @@ Auth routes are also available under `/auth/register` and `/auth/login`.
 | ------ | -------- | ------ |
 | GET | `/api/cart` | JWT |
 | POST | `/api/cart/items` | JWT |
+| PUT | `/api/cart/items/:id` | JWT |
 | DELETE | `/api/cart/items/:id` | JWT |
 | DELETE | `/api/cart` | JWT |
 | POST | `/api/orders` | JWT |
