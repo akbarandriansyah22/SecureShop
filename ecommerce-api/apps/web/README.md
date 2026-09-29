@@ -2,7 +2,7 @@
 
 Next.js App Router. Katalog, auth, keranjang, checkout, order customer, dan admin produk/kategori/order.
 
-Browser menulis cart, order, dan admin lewat `app/api/proxy/[...path]` (cookie `access_token` → `Authorization: Bearer`).
+Browser menulis cart, order, dan admin lewat `app/api/proxy/[...path]` (cookie `access_token` → `Authorization: Bearer`). Cookie `httpOnly`, `SameSite=Lax`, `maxAge` 2 jam (sama dengan JWT). Proxy hanya meneruskan prefix `cart`, `cart/items`, `orders`, `admin/products`, `admin/categories`, `admin/orders`; path lain 404. `middleware.ts` mengarahkan `/admin`, `/checkout`, `/orders`, `/account` tanpa cookie ke `/login`. Role admin tetap dicek di layout (`role_id === 1`). `next.config.ts` mengirim `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, dan CSP (`script-src`/`style-src` masih `'unsafe-inline'`). Login, register, logout, dan proxy menolak `Origin` yang bukan same-origin.
 
 ## Alur uji customer
 

@@ -6,8 +6,12 @@ import {
   authErrorMessage,
   readAuthEnvelope,
 } from "@/lib/auth";
+import { rejectCrossOrigin } from "@/lib/origin";
 
 export async function POST(request: Request) {
+  const blocked = rejectCrossOrigin(request);
+  if (blocked) return blocked;
+
   const input = (await request.json().catch(() => null)) as {
     email?: string;
     password?: string;

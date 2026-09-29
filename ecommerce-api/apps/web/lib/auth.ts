@@ -2,14 +2,16 @@ import { cookies } from "next/headers";
 import type { LoginResponse, User } from "./types";
 
 export const ACCESS_TOKEN_COOKIE = "access_token";
+// Matches JWT_EXPIRATION_HOURS=2 on the API.
+export const ACCESS_TOKEN_MAX_AGE = 60 * 60 * 2;
 
-export function authCookieOptions() {
+export function authCookieOptions(maxAge = ACCESS_TOKEN_MAX_AGE) {
   return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/",
-    maxAge: 60 * 60 * 24,
+    maxAge,
   };
 }
 
