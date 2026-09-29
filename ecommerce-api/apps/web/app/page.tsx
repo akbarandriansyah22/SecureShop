@@ -4,21 +4,29 @@ import { ProductImage } from "@/components/ui/product-image";
 import { getCategories, getProducts } from "@/lib/api";
 import { getSession } from "@/lib/auth";
 
-const COLLECTIONS = ["Living Room", "Bedroom", "Kitchen"];
-
 export default async function Page() {
-  const [categories, products, session] = await Promise.all([getCategories(), getProducts(), getSession()]);
+  const [categories, products, session] = await Promise.all([
+    getCategories(),
+    getProducts(),
+    getSession(),
+  ]);
   const items = products.error === null ? products.data.items : [];
   const hero = items.slice(0, 2);
-  const cats = categories.error === null ? categories.data : [];
 
   return (
     <div>
       <section className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:py-20">
         <div>
-          <h1 className="font-serif text-4xl font-normal leading-tight md:text-6xl">Listen to the amazing music sound.</h1>
-          <p className="mt-4 max-w-md text-neutral-600">Experience music like you have never heard before.</p>
-          <Link href="/search" className="mt-8 inline-block bg-neutral-950 px-6 py-3 text-sm text-white">
+          <h1 className="font-serif text-4xl font-normal leading-tight md:text-6xl">
+            Listen to the amazing music sound.
+          </h1>
+          <p className="mt-4 max-w-md text-neutral-600">
+            Experience music like you have never heard before.
+          </p>
+          <Link
+            href="/search"
+            className="mt-8 inline-block bg-neutral-950 px-6 py-3 text-sm text-white"
+          >
             Shop Now
           </Link>
           <div className="mt-8 flex gap-2">
@@ -28,7 +36,10 @@ export default async function Page() {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {(hero.length ? hero : [{ id: 0, name: "SecureShop", image_url: undefined, slug: "" }]).map((product) => (
+          {(hero.length
+            ? hero
+            : [{ id: 0, name: "SecureShop", image_url: undefined, slug: "" }]
+          ).map((product) => (
             <div key={product.id} className="aspect-[3/4] bg-neutral-100">
               <ProductImage src={product.image_url} name={product.name} />
             </div>
@@ -37,22 +48,10 @@ export default async function Page() {
       </section>
 
       {categories.error !== null ? (
-        <p className="mx-auto max-w-6xl px-4 text-sm text-red-700">{categories.error}</p>
+        <p className="mx-auto max-w-6xl px-4 text-sm text-red-700">
+          {categories.error}
+        </p>
       ) : null}
-
-      <section className="mx-auto max-w-6xl px-4 py-10">
-        <h2 className="mb-6 font-serif text-3xl">Shop Collection</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {COLLECTIONS.map((label) => {
-            const match = cats.find((category) => category.name.toLowerCase().includes(label.split(" ")[0].toLowerCase()));
-            return (
-              <Link key={label} href={match ? `/search?category=${match.id}` : "/search"} className="flex h-56 items-end bg-neutral-100 p-6">
-                <span className="font-serif text-2xl">{label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
 
       <section className="mx-auto max-w-6xl px-4 py-10">
         <h2 className="mb-6 font-serif text-3xl">Best Seller</h2>
@@ -73,7 +72,10 @@ export default async function Page() {
 
       <section className="mx-auto my-10 flex max-w-6xl flex-col items-start justify-between gap-4 bg-neutral-100 px-6 py-12 md:flex-row md:items-center">
         <h2 className="font-serif text-4xl">Up to 50% off</h2>
-        <Link href="/search" className="bg-neutral-950 px-6 py-3 text-sm text-white">
+        <Link
+          href="/search"
+          className="bg-neutral-950 px-6 py-3 text-sm text-white"
+        >
           Shop Now
         </Link>
       </section>

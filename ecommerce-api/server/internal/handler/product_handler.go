@@ -220,7 +220,7 @@ func (h *ProductHandler) UpdateStock(c *fiber.Ctx) error {
 // ERROR HANDLER (PRIVATE)
 // =======================
 
-func (h *ProductHandler) handleError(c *fiber.Ctx, err error) error {
+func (h *ProductHandler) handleError(_*fiber.Ctx, err error) error {
 	switch err.Error() {
 	case "product not found":
 		// Aman di-forward ke client — ini user-facing message, bukan internal detail
