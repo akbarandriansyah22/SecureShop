@@ -35,7 +35,7 @@ func (s *CartService) GetCart(ctx context.Context, userID int) (*models.CartResp
 	if err != nil || cart == nil {
 		cart, err = s.cartRepo.Create(ctx, userID)
 		if err != nil || cart == nil {
-			s.logger.Error("CartService.GetCart failed", err)
+			s.logger.Error("CartService.GetCart failed: %v", err)
 			return nil, fmt.Errorf("failed to get cart")
 		}
 	}
@@ -46,7 +46,7 @@ func (s *CartService) GetCart(ctx context.Context, userID int) (*models.CartResp
 func (s *CartService) cartResponse(ctx context.Context, cart *models.Cart) (*models.CartResponse, error) {
 	rows, err := s.cartRepo.GetCartItems(ctx, cart.ID)
 	if err != nil {
-		s.logger.Error("CartService.GetCart failed to get items", err)
+		s.logger.Error("CartService.GetCart failed to get items: %v", err)
 		return nil, fmt.Errorf("failed to get cart items: %w", err)
 	}
 
@@ -94,7 +94,7 @@ func (s *CartService) AddItem(ctx context.Context, userID, productID, quantity i
 	if err != nil {
 		cart, err = s.cartRepo.Create(ctx, userID)
 		if err != nil {
-			s.logger.Error("CartService.AddItem failed to create cart", err)
+			s.logger.Error("CartService.AddItem failed to create cart: %v", err)
 			return fmt.Errorf("failed to create cart")
 		}
 	}
@@ -108,7 +108,7 @@ func (s *CartService) AddItem(ctx context.Context, userID, productID, quantity i
 	}
 
 	if err := s.cartRepo.AddItem(ctx, cart.ID, productID, quantity); err != nil {
-		s.logger.Error("CartService.AddItem failed", err)
+		s.logger.Error("CartService.AddItem failed: %v", err)
 		return fmt.Errorf("failed to add cart item: %w", err)
 	}
 	return nil

@@ -227,7 +227,7 @@ func (h *ProductHandler) handleError(_*fiber.Ctx, err error) error {
 		return fiber.NewError(fiber.StatusNotFound, "product not found")
 	default:
 		// Log error internal, tapi jangan expose detail ke client
-		h.logger.Error("product handler error", err)
+		h.logger.Error("product handler error: %v", err)
 		return fiber.NewError(fiber.StatusInternalServerError, "internal server error")
 	}
 }

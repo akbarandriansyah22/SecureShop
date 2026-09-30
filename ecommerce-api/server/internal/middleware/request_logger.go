@@ -14,8 +14,7 @@ func RequestLogger(logger observability.Logger) fiber.Handler {
 		latency := time.Since(start)
 
 		logger.Info(
-			"http_request",
-			"method=%s path=%s status=%d latency=%s ip=%s",
+			"http_request: method=%s path=%s status=%d latency=%s ip=%s",
 			c.Method(),
 			c.Path(),
 			c.Response().StatusCode(),

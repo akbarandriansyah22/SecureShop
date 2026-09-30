@@ -21,7 +21,7 @@ func TestSecurityHeaders(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.Header.Get("X-Content-Type-Options") != "nosniff" {
 		t.Fatalf("nosniff missing: %q", resp.Header.Get("X-Content-Type-Options"))
 	}
@@ -56,7 +56,7 @@ func TestAuthRateLimitBurstReturns429(t *testing.T) {
 		}
 		last = resp.StatusCode
 		_, _ = io.Copy(io.Discard, resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 	}
 	if last != fiber.StatusTooManyRequests {
 		t.Fatalf("login burst: want 429, got %d", last)
@@ -68,7 +68,7 @@ func TestAuthRateLimitBurstReturns429(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != fiber.StatusTooManyRequests {
 		t.Fatalf("register shares auth limiter: want 429, got %d", resp.StatusCode)
 	}

@@ -28,13 +28,13 @@ func Auth(jwtSecret string, logger observability.Logger, users AuthUserLookup) f
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			logger.Warn("auth_failed", "missing authorization header ip=%s", c.IP())
+			logger.Warn("auth_failed: missing authorization header ip=%s", c.IP())
 			return unauthorized(c, "Authorization header required")
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			logger.Warn("auth_failed", "invalid auth header format ip=%s", c.IP())
+			logger.Warn("auth_failed: invalid auth header format ip=%s", c.IP())
 			return unauthorized(c, "Invalid authorization header format")
 		}
 
@@ -42,13 +42,13 @@ func Auth(jwtSecret string, logger observability.Logger, users AuthUserLookup) f
 
 		claims, err := security.ParseToken(tokenString, jwtSecret)
 		if err != nil {
-			logger.Warn("auth_failed", "invalid token ip=%s err=%v", c.IP(), err)
+			logger.Warn("auth_failed: invalid token ip=%s err=%v", c.IP(), err)
 			return unauthorized(c, "Invalid or expired token")
 		}
 
 		user, err := users.GetByID(c.Context(), claims.UserID)
 		if err != nil || user == nil || !user.IsActive || user.TokenVersion != claims.TokenVersion {
-			logger.Warn("auth_failed", "user rejected userID=%d ip=%s", claims.UserID, c.IP())
+			logger.Warn("auth_failed: user rejected userID=%d ip=%s", claims.UserID, c.IP())
 			return unauthorized(c, "Invalid or expired token")
 		}
 
@@ -59,8 +59,7 @@ func Auth(jwtSecret string, logger observability.Logger, users AuthUserLookup) f
 		c.Locals("user", claims)
 
 		logger.Info(
-			"auth_success",
-			"userID=%d email=%s ip=%s",
+			"auth_success: userID=%d email=%s ip=%s",
 			user.ID,
 			user.Email,
 			c.IP(),
@@ -90,7 +89,7 @@ func RequireRole(logger observability.Logger, allowedRoleIDs ...int) fiber.Handl
 
 		// Validasi: roleID harus ada dan bukan 0
 		if !ok || roleID == 0 {
-			logger.Warn("role_check_failed", "roleID not found or invalid ip=%s", c.IP())
+			logger.Warn("role_check_failed: roleID not found or invalid ip=%s", c.IP())
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 				"success": false,
 				"error":   "Forbidden: insufficient permissions",
@@ -100,14 +99,13 @@ func RequireRole(logger observability.Logger, allowedRoleIDs ...int) fiber.Handl
 		// Cek apakah roleID user ada di list yang diizinkan
 		for _, allowed := range allowedRoleIDs {
 			if roleID == allowed {
-				logger.Info("role_check_success", "roleID=%d ip=%s", roleID, c.IP())
+				logger.Info("role_check_success: roleID=%d ip=%s", roleID, c.IP())
 				return c.Next()
 			}
 		}
 
 		logger.Warn(
-			"role_check_failed",
-			"user roleID=%d not in allowed=%v ip=%s",
+			"role_check_failed: user roleID=%d not in allowed=%v ip=%s",
 			roleID, allowedRoleIDs, c.IP(),
 		)
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{

@@ -45,7 +45,7 @@ func (s *CategoryService) CreateCategory(ctx context.Context, req *models.Create
 	}
 
 	if err := s.categoryRepo.Create(ctx, category); err != nil {
-		s.logger.Error("CategoryService.CreateCategory failed", err)
+		s.logger.Error("CategoryService.CreateCategory failed: %v", err)
 		return nil, fmt.Errorf("failed to create category")
 	}
 
@@ -131,7 +131,7 @@ func (s *CategoryService) UpdateCategory(ctx context.Context, id int, req *model
 	}
 
 	if err := s.categoryRepo.Update(ctx, category); err != nil {
-		s.logger.Error("CategoryService.UpdateCategory failed", err)
+		s.logger.Error("CategoryService.UpdateCategory failed: %v", err)
 		return fmt.Errorf("failed to update category")
 	}
 
@@ -147,7 +147,7 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id int) error {
 	}
 
 	if err := s.categoryRepo.Delete(ctx, id); err != nil {
-		s.logger.Error("CategoryService.DeleteCategory failed", err)
+		s.logger.Error("CategoryService.DeleteCategory failed: %v", err)
 		return fmt.Errorf("failed to delete category")
 	}
 
@@ -159,7 +159,7 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id int) error {
 func (s *CategoryService) ListCategories(ctx context.Context) ([]*models.CategoryResponse, error) {
 	categories, err := s.categoryRepo.List(ctx)
 	if err != nil {
-		s.logger.Error("CategoryService.ListCategories failed", err)
+		s.logger.Error("CategoryService.ListCategories failed: %v", err)
 		return nil, fmt.Errorf("failed to list categories")
 	}
 
@@ -175,7 +175,7 @@ func (s *CategoryService) ListCategories(ctx context.Context) ([]*models.Categor
 func (s *CategoryService) GetCategoryTree(ctx context.Context) ([]*models.CategoryTreeResponse, error) {
 	rootCategories, err := s.categoryRepo.GetRootCategories(ctx)
 	if err != nil {
-		s.logger.Error("CategoryService.GetCategoryTree failed", err)
+		s.logger.Error("CategoryService.GetCategoryTree failed: %v", err)
 		return nil, fmt.Errorf("failed to get category tree")
 	}
 
@@ -210,7 +210,7 @@ func (s *CategoryService) GetCategoryTree(ctx context.Context) ([]*models.Catego
 func (s *CategoryService) GetRootCategories(ctx context.Context) ([]*models.CategoryResponse, error) {
 	categories, err := s.categoryRepo.GetRootCategories(ctx)
 	if err != nil {
-		s.logger.Error("CategoryService.GetRootCategories failed", err)
+		s.logger.Error("CategoryService.GetRootCategories failed: %v", err)
 		return nil, fmt.Errorf("failed to get root categories")
 	}
 
@@ -226,7 +226,7 @@ func (s *CategoryService) GetRootCategories(ctx context.Context) ([]*models.Cate
 func (s *CategoryService) GetChildCategories(ctx context.Context, parentID int) ([]*models.CategoryResponse, error) {
 	categories, err := s.categoryRepo.GetChildren(ctx, parentID)
 	if err != nil {
-		s.logger.Error("CategoryService.GetChildCategories failed", err)
+		s.logger.Error("CategoryService.GetChildCategories failed: %v", err)
 		return nil, fmt.Errorf("failed to get child categories")
 	}
 
@@ -285,7 +285,7 @@ func (s *CategoryService) GetProductsByCategory(categoryID, page, limit int) ([]
 	// Get products
 	products, total, err := s.productRepo.GetProductsByCategory(ctx, categoryID, page, limit)
 	if err != nil {
-		s.logger.Error("CategoryService.GetProductsByCategory failed", err)
+		s.logger.Error("CategoryService.GetProductsByCategory failed: %v", err)
 		return nil, 0, fmt.Errorf("failed to get products")
 	}
 
@@ -330,7 +330,7 @@ func (s *CategoryService) GetCategoryStats() (interface{}, error) {
 	ctx := context.Background()
 	categories, err := s.categoryRepo.List(ctx)
 	if err != nil {
-		s.logger.Error("CategoryService.GetCategoryStats failed", err)
+		s.logger.Error("CategoryService.GetCategoryStats failed: %v", err)
 		return nil, fmt.Errorf("failed to get category statistics")
 	}
 

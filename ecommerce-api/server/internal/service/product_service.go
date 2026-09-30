@@ -44,7 +44,7 @@ func (s *ProductService) CreateProduct(
 	}
 
 	if err := s.productRepo.Create(ctx, product); err != nil {
-		s.logger.Error("failed to create product", err)
+		s.logger.Error("failed to create product: %v", err)
 		return nil, err
 	}
 

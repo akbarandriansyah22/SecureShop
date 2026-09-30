@@ -107,8 +107,7 @@ func NewRateLimitMiddleware(cfg RateLimitConfig) fiber.Handler {
 			// Log violation
 			if cfg.Logger != nil {
 				cfg.Logger.Warn(
-					"rate_limit_exceeded",
-					"key=%s ip=%s path=%s method=%s remaining=%d",
+					"rate_limit_exceeded: key=%s ip=%s path=%s method=%s remaining=%d",
 					key,
 					c.IP(),
 					c.Path(),

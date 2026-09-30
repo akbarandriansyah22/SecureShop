@@ -128,7 +128,7 @@ func doAuthed(t *testing.T, app *fiber.App, method, path, token, body string) in
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	return resp.StatusCode
 }
 

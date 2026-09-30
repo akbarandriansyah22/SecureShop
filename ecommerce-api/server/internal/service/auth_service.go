@@ -77,7 +77,7 @@ func (s *AuthService) Register(ctx context.Context, req *models.RegisterRequest)
 	// Hash password
 	hashedPassword, err := security.HashPassword(req.Password)
 	if err != nil {
-		s.logger.Error("AuthService.Register: Failed to hash password", err)
+		s.logger.Error("AuthService.Register: Failed to hash password: %v", err)
 		return nil, fmt.Errorf("failed to register user")
 	}
 
@@ -94,7 +94,7 @@ func (s *AuthService) Register(ctx context.Context, req *models.RegisterRequest)
 	}
 
 	if err := s.userRepo.Create(ctx, user); err != nil {
-		s.logger.Error("AuthService.Register: Failed to create user", err)
+		s.logger.Error("AuthService.Register: Failed to create user: %v", err)
 		return nil, fmt.Errorf("failed to register user")
 	}
 
@@ -103,7 +103,7 @@ func (s *AuthService) Register(ctx context.Context, req *models.RegisterRequest)
 	// Generate JWT token
 	token, err := security.GenerateToken(user.ID, user.Email, user.RoleID, user.Name, s.jwtSecret, s.jwtExpirationHours, user.TokenVersion)
 	if err != nil {
-		s.logger.Error("AuthService.Register: Failed to generate token", err)
+		s.logger.Error("AuthService.Register: Failed to generate token: %v", err)
 		return nil, fmt.Errorf("failed to generate token")
 	}
 
@@ -157,7 +157,7 @@ func (s *AuthService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 	// Generate JWT token
 	token, err := security.GenerateToken(user.ID, user.Email, user.RoleID, user.Name, s.jwtSecret, s.jwtExpirationHours, user.TokenVersion)
 	if err != nil {
-		s.logger.Error("AuthService.Login: Failed to generate token", err)
+		s.logger.Error("AuthService.Login: Failed to generate token: %v", err)
 		return nil, fmt.Errorf("failed to generate token")
 	}
 
@@ -174,7 +174,7 @@ func (s *AuthService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 func (s *AuthService) GetProfile(ctx context.Context, userID int) (*models.UserResponse, error) {
 	user, err := s.userRepo.GetByID(ctx, userID)
 	if err != nil || user == nil {
-		s.logger.Error("AuthService.GetProfile: User not found - UserID=%d", err)
+		s.logger.Error("AuthService.GetProfile: User not found - UserID=%d: %v", userID, err)
 		return nil, fmt.Errorf("user not found")
 	}
 
@@ -212,7 +212,7 @@ func (s *AuthService) UpdateProfile(ctx context.Context, userID int, fullName, e
 
 	// Update user in database
 	if err := s.userRepo.Update(ctx, user); err != nil {
-		s.logger.Error("AuthService.UpdateProfile: Failed to update user", err)
+		s.logger.Error("AuthService.UpdateProfile: Failed to update user: %v", err)
 		return nil, fmt.Errorf("failed to update profile")
 	}
 
@@ -248,13 +248,13 @@ func (s *AuthService) ChangePassword(ctx context.Context, userID int, oldPasswor
 	// Hash new password
 	hashedPassword, err := security.HashPassword(newPassword)
 	if err != nil {
-		s.logger.Error("AuthService.ChangePassword: Failed to hash password", err)
+		s.logger.Error("AuthService.ChangePassword: Failed to hash password: %v", err)
 		return fmt.Errorf("failed to change password")
 	}
 
 	// Update password
 	if err := s.userRepo.UpdatePassword(ctx, userID, hashedPassword); err != nil {
-		s.logger.Error("AuthService.ChangePassword: Failed to update password", err)
+		s.logger.Error("AuthService.ChangePassword: Failed to update password: %v", err)
 		return fmt.Errorf("failed to change password")
 	}
 

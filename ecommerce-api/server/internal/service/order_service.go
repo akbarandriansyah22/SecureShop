@@ -71,7 +71,7 @@ func (s *OrderService) GetUserOrders(userID, page, limit int) ([]*models.OrderDe
 	ctx := context.Background()
 	orders, total, err := s.orderRepo.GetUserOrders(ctx, userID, page, limit)
 	if err != nil {
-		s.logger.Error("OrderService.GetUserOrders failed", err)
+		s.logger.Error("OrderService.GetUserOrders failed: %v", err)
 		return nil, 0, fmt.Errorf("failed to get user orders")
 	}
 	mapped, err := s.mapOrders(ctx, orders)
@@ -138,7 +138,7 @@ func (s *OrderService) CreateFromCart(userID int, shippingAddress, shippingPhone
 	}
 
 	if err := s.orderRepo.Checkout(ctx, order, orderItems); err != nil {
-		s.logger.Error("OrderService.CreateFromCart failed", err)
+		s.logger.Error("OrderService.CreateFromCart failed: %v", err)
 		return nil, err
 	}
 
@@ -158,7 +158,7 @@ func (s *OrderService) UpdateStatus(orderID int, status string) error {
 	}
 
 	if err := s.orderRepo.UpdateStatus(ctx, orderID, status); err != nil {
-		s.logger.Error("OrderService.UpdateStatus failed", err)
+		s.logger.Error("OrderService.UpdateStatus failed: %v", err)
 		return fmt.Errorf("failed to update order status")
 	}
 
@@ -182,7 +182,7 @@ func (s *OrderService) CancelOrder(orderID int) error {
 
 	// Update status to cancelled
 	if err := s.orderRepo.UpdateStatus(ctx, orderID, "cancelled"); err != nil {
-		s.logger.Error("OrderService.CancelOrder failed", err)
+		s.logger.Error("OrderService.CancelOrder failed: %v", err)
 		return fmt.Errorf("failed to cancel order")
 	}
 
@@ -197,7 +197,7 @@ func (s *OrderService) GetOrderStats() (interface{}, error) {
 	// Get all orders (simplified - get all without filter)
 	orders, _, err := s.orderRepo.GetAllOrders(ctx, nil)
 	if err != nil {
-		s.logger.Error("OrderService.GetOrderStats failed", err)
+		s.logger.Error("OrderService.GetOrderStats failed: %v", err)
 		return nil, fmt.Errorf("failed to get order statistics")
 	}
 
@@ -281,7 +281,7 @@ func (s *OrderService) GetAllOrders(page, limit int, status string, userID int) 
 
 	orders, total, err := s.orderRepo.GetAllOrders(ctx, filter)
 	if err != nil {
-		s.logger.Error("OrderService.GetAllOrders failed", err)
+		s.logger.Error("OrderService.GetAllOrders failed: %v", err)
 		return nil, 0, fmt.Errorf("failed to get orders")
 	}
 
