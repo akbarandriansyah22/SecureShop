@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
     -o app \
     ./server/cmd
 
-FROM alpine:3.22.6
+FROM alpine:3.24.2
 
 WORKDIR /app
 
