@@ -1,6 +1,6 @@
 module github.com/akbarandriansyah22/BackendProject_and_Portofolio/e-commerce-api
 
-go 1.25.2
+go 1.26.0
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.11
@@ -33,7 +33,6 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
