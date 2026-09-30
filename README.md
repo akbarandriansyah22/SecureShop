@@ -1,122 +1,259 @@
 # SecureShop
 
-Toko online fullstack: storefront Next.js untuk pembeli dan admin, API Go (Fiber) untuk katalog, keranjang, dan order, plus homelab DevSecOps yang menjalankan aplikasi itu.
+Aplikasi e-commerce fullstack yang dibangun menggunakan Next.js sebagai frontend dan Go Fiber sebagai backend API, dilengkapi dengan workflow DevSecOps, containerization, observability, Kubernetes, dan Terraform.
 
-Repo ini tetap `devops-homelab` karena isinya bukan hanya toko. Di dalamnya ada pipeline, observability, cluster Kubernetes lokal, dan lab Terraform AWS. Nama produknya SecureShop, supaya tidak tertukar dengan project fullstack lain.
+Repository ini digunakan sebagai project portfolio untuk menunjukkan penerapan software engineering, backend development, DevOps, dan DevSecOps dalam satu sistem.
 
-[![CI](https://img.shields.io/github/actions/workflow/status/akbarandriansyah22/devops-homelab/ci.yml?branch=main&label=CI&logo=github&logoColor=white)](https://github.com/akbarandriansyah22/devops-homelab/actions/workflows/ci.yml)
-[![GHCR](https://img.shields.io/github/actions/workflow/status/akbarandriansyah22/devops-homelab/cd.yml?branch=main&label=GHCR%20publish&logo=docker&logoColor=white)](https://github.com/akbarandriansyah22/devops-homelab/actions/workflows/cd.yml)
+Catatan: repository utama memakai nama SecureShop, tetapi image API yang dipublikasikan ke GHCR saat ini masih memakai path `devops-homelab`. Itu mengikuti konfigurasi workflow CD yang sedang digunakan.
+
+[![CI](https://img.shields.io/github/actions/workflow/status/akbarandriansyah22/SecureShop/ci.yml?branch=main&label=CI&logo=github&logoColor=white)](https://github.com/akbarandriansyah22/SecureShop/actions/workflows/ci.yml)
+[![GHCR](https://img.shields.io/github/actions/workflow/status/akbarandriansyah22/SecureShop/cd.yml?branch=main&label=GHCR%20publish&logo=docker&logoColor=white)](https://github.com/akbarandriansyah22/SecureShop/actions/workflows/cd.yml)
 [![Go](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-## Apa ini
+## Status proyek
 
-SecureShop adalah toko online kecil dengan dua peran: customer dan admin.
+- Backend: Go 1.26 + Fiber
+- Frontend: Next.js + TypeScript
+- Database: PostgreSQL
+- Container: Docker
+- CI: GitHub Actions
+- Security scanning: Gitleaks, GoSec, Trivy
+- SBOM: CycloneDX
+- Observability: Prometheus, Grafana, Loki, Alertmanager, Promtail
+- Orchestration: Kubernetes
+- Local Kubernetes: kind
+- Infrastructure as Code: Terraform
+- Container registry: GitHub Container Registry (GHCR)
 
-Customer bisa daftar, login, melihat katalog, mencari produk, mengisi keranjang, checkout, dan melihat order. Admin bisa mengelola produk, kategori, dan status order. Checkout menyimpan `payment_method` yang dipilih di form. Tidak ada payment gateway.
+## Gambaran umum
 
-Storefront tidak memegang JWT di browser. Login menulis cookie `access_token` (`httpOnly`, `SameSite=Lax`, 2 jam). Mutasi cart, order, dan admin lewat BFF di `apps/web` (`app/api/proxy`), yang hanya meneruskan prefix yang di-allowlist dan menolak `Origin` yang bukan same-origin. Role admin (`role_id = 1`) tetap dicek di API.
+SecureShop adalah aplikasi e-commerce fullstack yang terdiri dari frontend berbasis Next.js dan backend REST API berbasis Go Fiber.
 
-Dokumentasi storefront: [`ecommerce-api/apps/web/README.md`](./ecommerce-api/apps/web/README.md).
-Dokumentasi API: [`ecommerce-api/README.md`](./ecommerce-api/README.md).
+Aplikasi menyediakan autentikasi, manajemen produk dan kategori, keranjang belanja, pemesanan, checkout berbasis metode pembayaran, serta fitur administrasi. Checkout menyimpan `payment_method`. Tidak ada payment gateway.
 
-## Bukan production
+Selain fungsi aplikasi, repository ini juga berfokus pada penerapan praktik DevOps dan DevSecOps:
 
-Ini portofolio / homelab, bukan toko yang siap terima pembayaran sungguhan.
+- Continuous Integration memakai GitHub Actions
+- Static code analysis
+- Secret scanning
+- Software Composition Analysis
+- Container image scanning
+- Filesystem security scanning
+- Software Bill of Materials (SBOM)
+- Automated testing
+- Docker image publishing ke GHCR
+- Monitoring dan observability
+- Deployment memakai Kubernetes
+- Infrastructure as Code memakai Terraform
 
-- Tidak ada payment gateway, webhook bayar, atau rekonsiliasi.
-- Katalog tidak ikut ter-seed. Migration awal hanya mengisi role. Produk dan kategori harus dimasukkan sendiri.
-- Storefront belum masuk Docker Compose. `apps/web` dijalankan dengan `npm run dev` di port 3001. Grafana memakai 3000.
-- Image yang dipublish ke GHCR adalah API, bukan storefront.
-- Cluster kind dan Terraform AWS adalah lab. `terraform apply` berbiaya dan tidak dijalankan otomatis.
+## Fitur utama
 
-## Stack
+### Customer
 
-| Lapisan | Teknologi |
-| --- | --- |
-| Storefront | Next.js App Router, TypeScript, Tailwind CSS |
-| API | Go 1.26, Fiber, JWT, bcrypt |
-| Data | PostgreSQL 16 |
-| Auth web | Cookie `httpOnly` + BFF proxy, RBAC admin/customer |
-| Runtime lokal | Docker Compose (API, Postgres, observability) |
-| Registry | GHCR, image API |
-| Orkestrasi | kind (Kubernetes lokal) |
-| IaC | Terraform, VPC dan EC2 di `ap-southeast-1` |
-| CI/CD | GitHub Actions: Gitleaks, GoSec, Trivy, npm audit, lalu publish image |
-| Observability | Prometheus, Grafana, Loki, Alertmanager |
+- Registrasi akun
+- Login dan logout
+- Melihat katalog produk
+- Melihat kategori produk
+- Menambahkan produk ke keranjang
+- Mengubah jumlah produk di keranjang
+- Menghapus produk dari keranjang
+- Checkout
+- Membuat pesanan
+- Melihat riwayat pesanan
+- Melihat informasi akun
+
+### Admin
+
+- Mengelola produk
+- Mengelola kategori
+- Melihat dan mengelola pesanan
+- Role-based access control
+- Endpoint administrasi yang membutuhkan role Admin
+
+### Backend API
+
+- RESTful API
+- JWT authentication
+- RBAC
+- Password hashing memakai bcrypt
+- Ownership verification
+- Request validation
+- Rate limiting
+- Security headers
+- CORS
+- Health check, liveness check, readiness check
+- Prometheus metrics
+- Structured logging
 
 ## Arsitektur
 
 ```text
-Browser
-   │
-   ▼
-┌─────────────────────┐
-│ SecureShop web      │  Next.js :3001
-│ katalog langsung   │
-│ mutasi lewat BFF   │
-└────────┬───────────┘
-         │
-         ▼
-┌─────────────────────┐     image API
-│ SecureShop API      │──────────────┐
-│ Go Fiber :8080     │               │
-└────────┬────────────┘               │
-         │                               │
-    ┌────┴─────┐                          │
-    ▼          ▼                          ▼
-┌────────┐  ┌──────────────────┐     ┌──────────────────┐
-│ Compose │  │ kind (lokal)     │     │ AWS lab        │
-│ API+DB  │  │ manifest di k8s/ │     │ Terraform       │
-│ + obs.  │  └──────────────────┘     │ VPC · EC2 + EIP  │
-└────────┘                            └──────────────────┘
+                         ┌────────────────────┐
+                         │      Browser        │
+                         └─────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌────────────────────┐
+                         │      Next.js        │
+                         │     Storefront      │
+                         │                     │
+                         │ App Router          │
+                         │ TypeScript          │
+                         │ Tailwind CSS        │
+                         │ BFF / API Proxy     │
+                         └─────────┬──────────┘
+                                    │
+                                    │ HTTP / JSON
+                                    ▼
+                         ┌────────────────────┐
+                         │      Go Fiber       │
+                         │      REST API       │
+                         │                     │
+                         │ Handler             │
+                         │ Service             │
+                         │ Repository          │
+                         └─────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌────────────────────┐
+                         │     PostgreSQL      │
+                         └────────────────────┘
 ```
 
-Alur delivery: push ke `main` menjalankan CI (uji dan scan). CD mempublikasikan image API ke GHCR hanya setelah CI pada SHA yang sama hijau. Storefront tidak ikut image itu.
+Untuk observability, backend terhubung ke stack monitoring dan logging:
 
-## Struktur
+```text
+                  ┌──────────────────┐
+                  │   SecureShop API  │
+                  └────────┬────────┘
+                            │
+              ┌────────────┼────────────┐
+              │             │             │
+              ▼             ▼             ▼
+        ┌──────────┐ ┌──────────┐ ┌────────────┐
+        │Prometheus │ │   Loki    │ │Alertmanager│
+        └─────┬─────┘ └─────┬─────┘ └────────────┘
+              │             │
+              ▼             ▼
+        ┌────────────────────────┐
+        │        Grafana         │
+        └────────────────────────┘
+```
 
-| Direktori | Isi |
-| --- | --- |
-| [`ecommerce-api/apps/web/`](./ecommerce-api/apps/web) | Storefront SecureShop |
-| [`ecommerce-api/server/`](./ecommerce-api/server) | API Go |
-| [`ecommerce-api/`](./ecommerce-api) | Compose, migration, observability |
-| [`k8s/`](./k8s) | Manifest kind |
-| [`infra/terraform/`](./infra/terraform) | VPC dua AZ, security group, EC2 `t3.micro` + EIP |
-| [`.github/workflows/`](./.github/workflows) | CI dan publikasi image API |
+## Teknologi yang digunakan
 
-Image API: `ghcr.io/akbarandriansyah22/devops-homelab/ecommerce-api` (tag `latest` dan `main-<sha>`).
+### Backend
 
-## Cara menjalankan
+- Go 1.26
+- Fiber
+- PostgreSQL
+- JWT
+- bcrypt
+- Prometheus client
+- zap
 
-**Prasyarat:** Docker untuk API. Node.js untuk storefront. kind dan Terraform hanya untuk lab masing-masing.
+### Frontend
 
-### 1. API + observability
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+
+### DevOps
+
+- Docker dan Docker Compose
+- GitHub Actions
+- GitHub Container Registry
+- Kubernetes dan kind
+- Terraform
+
+### DevSecOps
+
+- Gitleaks
+- GoSec
+- Trivy
+- CycloneDX SBOM
+- `go test` dan Go race detector
+- golangci-lint
+- npm audit
+
+### Observability
+
+- Prometheus
+- Grafana
+- Loki
+- Promtail
+- Alertmanager
+
+## Struktur repository
+
+Kode API ada di `ecommerce-api/server`, bukan di root `ecommerce-api`.
+
+```text
+SecureShop/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       └── cd.yml
+├── ecommerce-api/
+│   ├── apps/
+│   │   └── web/                 # storefront Next.js
+│   ├── server/
+│   │   ├── cmd/main.go
+│   │   └── internal/
+│   │       ├── handler/
+│   │       ├── service/
+│   │       ├── repository/
+│   │       ├── middleware/
+│   │       ├── models/
+│   │       └── database/
+│   ├── migrations/
+│   ├── monitoring/
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── README.md
+├── k8s/
+│   ├── base/
+│   ├── kind-config.yaml
+│   └── README.md
+├── infra/
+│   └── terraform/
+│       └── README.md
+└── README.md
+```
+
+## Menjalankan secara lokal
+
+### Clone repository
 
 ```bash
-git clone https://github.com/akbarandriansyah22/devops-homelab.git
-cd devops-homelab/ecommerce-api
+git clone https://github.com/akbarandriansyah22/SecureShop.git
+cd SecureShop
+```
+
+### Menjalankan backend API
+
+Entrypoint ada di `ecommerce-api/server/cmd`.
+
+```bash
+cd ecommerce-api
 cp .env.example .env
 ```
 
-Isi `DB_PASSWORD`, `JWT_SECRET`, dan `METRICS_TOKEN` (contoh: `openssl rand -hex 32`). Set `DB_HOST=postgres`.
+Isi `DB_PASSWORD`, `JWT_SECRET`, dan `METRICS_TOKEN`. Untuk jalan tanpa Compose, PostgreSQL harus sudah tersedia dan `DB_HOST` mengarah ke instance itu.
 
 ```bash
-docker compose up -d --build
-curl -sf http://localhost:8080/live
-curl -sf http://localhost:8080/ready
+cd server
+go mod download
+go run ./cmd
 ```
 
-| Layanan | URL |
-| --- | --- |
-| API | http://localhost:8080 |
-| Grafana | http://localhost:3000 |
-| Prometheus | http://localhost:9090 |
-| Alertmanager | http://localhost:9093 |
+API berjalan di http://localhost:8080.
 
-Kredensial Grafana ada di `ecommerce-api/docker-compose.yml`.
+Cara yang sekaligus mengangkat database dan observability adalah Docker Compose, di bagian bawah.
 
-### 2. Storefront
+### Menjalankan frontend
 
 API harus sudah jalan di `:8080`.
 
@@ -127,88 +264,313 @@ npm install
 npm run dev
 ```
 
-Buka http://localhost:3001. `API_URL` di `.env.local` mengarah ke `http://localhost:8080`. Registrasi membuat customer (`role_id = 2`). Admin tidak dibuat dari form; ubah `role_id` menjadi `1` di database, lalu login lagi. Detailnya di [`ecommerce-api/apps/web/README.md`](./ecommerce-api/apps/web/README.md).
+Frontend: http://localhost:3001. `API_URL` di `.env.local` mengarah ke `http://localhost:8080`. Grafana memakai port 3000, jadi storefront tidak memakai port itu.
 
-### 3. Cluster kind
+## Docker Compose
 
-Ikuti [`k8s/README.md`](./k8s/README.md). Jika `docker pull` dari GHCR gagal (`denied`), bangun image secara lokal lalu muat dengan `kind load`.
+Backend menyediakan Docker Compose untuk API dan service observability. Storefront Next.js belum masuk Compose.
+
+| Service | Port | Keterangan |
+| --- | --- | --- |
+| API | 8080 | Go Fiber REST API |
+| PostgreSQL | 5432 | Database |
+| Prometheus | 9090 | Metrics |
+| Grafana | 3000 | Dashboard observability |
+| Alertmanager | 9093 | Alert |
+| Loki | 3100 | Log |
+
+```bash
+cd ecommerce-api
+docker compose up -d --build
+docker compose ps
+docker compose logs -f
+```
+
+## Health check
+
+### Liveness
+
+`GET /live` memeriksa apakah proses aplikasi masih berjalan. Endpoint ini tidak memeriksa database.
+
+```json
+{ "status": "ok" }
+```
+
+### Readiness
+
+`GET /ready` memeriksa apakah aplikasi dapat berkomunikasi dengan PostgreSQL. Jika database tidak tersedia, endpoint mengembalikan HTTP 503.
+
+```json
+{ "db": "ok", "status": "ready" }
+```
+
+### Health
+
+`GET /health` memberi informasi kondisi aplikasi dan database.
+
+### Metrics
+
+`GET /metrics` dipakai Prometheus. Endpoint ini dilindungi Bearer token lewat `METRICS_TOKEN`.
+
+## Autentikasi dan otorisasi
+
+SecureShop memakai JWT untuk autentikasi. Password disimpan sebagai hash bcrypt.
+
+RBAC memakai dua role:
+
+- `1` Admin
+- `2` Customer
+
+Admin mengakses endpoint administrasi. Customer hanya mengakses resource miliknya. API juga menerapkan ownership verification supaya satu pengguna tidak membaca resource pengguna lain.
+
+Registrasi dari form membuat customer. Admin tidak dibuat dari form; ubah `role_id` di database, lalu login lagi.
+
+## Frontend dan BFF
+
+Storefront memakai Next.js App Router. Mutasi berikut lewat API proxy yang berfungsi sebagai BFF:
+
+- Cart
+- Cart items
+- Orders
+- Admin products
+- Admin categories
+- Admin orders
+
+```text
+Browser
+   │
+   ▼
+Next.js API Proxy
+   │
+   │ Authorization: Bearer <JWT>
+   ▼
+Go Fiber API
+   │
+   ▼
+PostgreSQL
+```
+
+Token disimpan di cookie `httpOnly` dengan `SameSite=Lax`. Access token tidak diekspos ke JavaScript di browser. Proxy hanya meneruskan prefix yang di-allowlist, dan menolak `Origin` yang bukan same-origin.
+
+## Keamanan frontend
+
+- Cookie `httpOnly`
+- `SameSite=Lax`
+- Origin validation
+- Content Security Policy
+- `X-Content-Type-Options`
+- `X-Frame-Options`
+- `Referrer-Policy`
+- `Permissions-Policy`
+- Middleware untuk proteksi route
+- Pemeriksaan role untuk halaman admin
+
+Content Security Policy masih memakai `unsafe-inline` pada `script-src` dan `style-src`.
+
+## Database
+
+SecureShop memakai PostgreSQL. Tabel utama:
+
+- `roles`
+- `users`
+- `products`
+- `categories`
+- `product_categories`
+- `carts`
+- `cart_items`
+- `orders`
+- `order_items`
+- `payments`
+
+Role default: `1` Admin, `2` Customer. Tabel `payments` menyimpan metode yang dipilih saat checkout, bukan integrasi payment gateway.
+
+## CI
+
+Pipeline ada di [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
+
+```text
+Push / Pull Request
+        │
+        ▼
+ Secret scanning
+        │
+        ▼
+   Go quality
+        │
+        ├── golangci-lint
+        ├── GoSec
+        ├── go test
+        ├── race detection
+        └── coverage
+        │
+        ▼
+ Docker image build
+        │
+        ▼
+ Trivy image scan
+        │
+        ▼
+     SBOM
+        │
+        ▼
+ Filesystem scan
+        │
+        ▼
+    Web QA
+```
+
+### Security scanning
+
+- **Gitleaks** mendeteksi secret atau credential yang tidak sengaja masuk ke repository.
+- **GoSec** melakukan static security analysis pada kode Go. Hasilnya juga dipublikasikan sebagai SARIF.
+- **Trivy** memindai container image, filesystem, dependency, konfigurasi Kubernetes, dan konfigurasi Terraform, lalu menghasilkan SBOM.
+
+Gate severity: `HIGH` dan `CRITICAL`. Vulnerability yang belum punya fix dapat diabaikan sesuai konfigurasi pipeline.
+
+### SBOM
+
+Pipeline menghasilkan SBOM CycloneDX lewat Trivy. Artifact SBOM disimpan sebagai hasil workflow CI.
+
+## CD
+
+Workflow ada di [`.github/workflows/cd.yml`](./.github/workflows/cd.yml). Workflow membangun dan mempublikasikan image API ke GHCR.
+
+```text
+ghcr.io/akbarandriansyah22/devops-homelab/ecommerce-api
+```
+
+Tag: `latest` dan `main-<commit-sha>`.
+
+CD berjalan setelah CI pada branch `main` berhasil. CD juga bisa dijalankan manual lewat `workflow_dispatch`, dengan input `confirm` bernilai `publish`. Image tidak ditandatangani.
+
+Path image masih `devops-homelab` karena mengikuti workflow CD yang ada sekarang. Rename repository tidak memindahkan package GHCR.
+
+## Kubernetes
+
+Konfigurasi ada di [`k8s/`](./k8s). Deployment lokal memakai kind.
 
 ```bash
 kind create cluster --name ecommerce --config k8s/kind-config.yaml
 cp k8s/base/secret.example.yaml k8s/base/secret.yaml
 kubectl apply -f k8s/base
+kubectl get pods
+kubectl get services
+kubectl get deployments
 ```
 
-HTTPS lewat Ingress: [`k8s/README.md`](./k8s/README.md) (CA lab + `https://ecommerce.local`). Port-forward `8080` tetap bisa dipakai.
+Jika `docker pull` dari GHCR gagal (`denied`), bangun image secara lokal lalu muat dengan `kind load`. Detail ada di [`k8s/README.md`](./k8s/README.md).
 
-### 4. Lab AWS
+### Ingress dan TLS
 
-Default-nya `plan`. `apply` membuat EC2, EBS, dan IP publik, jadi ada biaya.
+Environment lokal memakai NGINX Ingress. Host lab: `ecommerce.local`. Sertifikat TLS di repo adalah sertifikat lab, bukan sertifikat production.
+
+### PostgreSQL di Kubernetes
+
+PostgreSQL pada manifest kind memakai `emptyDir`. Data hilang saat Pod dihapus atau dibuat ulang. Ini untuk local lab, bukan database production.
+
+## Terraform
+
+Infrastructure as Code ada di [`infra/terraform/`](./infra/terraform), region `ap-southeast-1`.
+
+Yang dibuat:
+
+- VPC
+- 2 public subnet
+- 2 private subnet
+- Security group
+- EC2 `t3.micro`
+- Elastic IP
+
+Tidak ada EKS, RDS, NAT Gateway, ALB, atau Auto Scaling Group.
 
 ```bash
 cd infra/terraform
 cp terraform.tfvars.example terraform.tfvars
 terraform init
-terraform validate
 terraform plan
 ```
 
-## CI/CD
+`terraform apply` dapat menimbulkan biaya AWS. Setelah eksperimen selesai, hapus resource dengan `terraform destroy`.
 
-| Workflow | Pemicu | Fungsi |
-| --- | --- | --- |
-| **CI** — `Go CI + DevSecOps Pipeline` | `ecommerce-api/**`, `k8s/**`, `infra/terraform/**`, atau file workflow | Job terpisah: `secrets`, `go-qa`, `api-image`, `fs-scan`, `web-qa`. HIGH/CRITICAL menggagalkan job |
-| **CD** — `Publish image to GHCR` | CI di `main` sukses | Tag `main-<sha>` dan `latest` untuk image API. Image tidak ditandatangani |
+## Observability
 
-Job CI tidak memakai `if: always()` untuk unggah SARIF. Action dipin ke commit SHA. Gitleaks memakai image resmi yang dipin digest, tanpa `continue-on-error`.
+```text
+Go API
+ │
+ ├─────────────► Prometheus ────► Grafana
+ │
+ └─────────────► Loki ◄──── Promtail
 
-Dua false positive Gitleaks di-allowlist di [`.gitleaksignore`](./.gitleaksignore), bukan seluruh `.env.example`:
-
-- `ecommerce-api/.env.example` — rule `generic-api-key` pada `JWT_EXPIRATION_HOURS=2`
-- `ecommerce-api/server/internal/config/security_validation_test.go` — JWT dummy unit test
-
-`workflow_dispatch` pada CD tidak mem-publish begitu saja. Input `confirm` harus `publish`, dan CI untuk SHA yang sama harus sudah sukses. Cosign tidak dipasang.
-
-Dependabot mingguan ada di [`.github/dependabot.yml`](./.github/dependabot.yml). Dependabot alerts dan secret scanning tidak hidup hanya karena file itu ada; nyalakan manual di Settings → Code security.
-
-```bash
-docker pull ghcr.io/akbarandriansyah22/devops-homelab/ecommerce-api:latest
+Prometheus ────► Alertmanager
 ```
 
-Jika muncul `denied`, package masih private.
+- Prometheus mengumpulkan metrics dari API.
+- Grafana menampilkan dashboard.
+- Loki menyimpan log.
+- Promtail mengirim log ke Loki.
+- Alertmanager mengelola alert dari Prometheus.
 
-## Keputusan desain
+## Testing
 
-| Keputusan | Alasan |
-| --- | --- |
-| kind, bukan EKS | Control plane EKS berbiaya per jam |
-| EC2 di subnet publik, tanpa NAT Gateway | NAT Gateway terlalu mahal untuk lab |
-| Image bisa dimuat ke kind tanpa GHCR | Package GHCR baru private secara default |
-| Storefront di port 3001 | Grafana sudah memakai 3000 |
-| Tidak ada payment gateway | Checkout hanya mencatat metode, supaya tidak mengklaim integrasi yang tidak ada |
+```bash
+cd ecommerce-api/server
+go test ./...
+```
 
-Di luar cakupan: EKS, NAT Gateway, RDS, ALB, Helm, public CA, dan pembayaran sungguhan.
+CI juga menjalankan race detection dan coverage:
 
-## Batasan
+```bash
+go test -race -coverprofile=coverage.out ./...
+```
 
-- Homelab / demonstrasi. Bukan production-grade dan bukan multi-region.
-- `terraform apply` opsional dan berbiaya. Yang aman dicoba lebih dulu adalah `plan`.
-- `ssh_cidr` dan `allowed_app_cidr` tidak punya default `0.0.0.0/0`. Isi `/32` lewat `terraform.tfvars`.
-- Deployment kind memakai tag `latest`. Postgres di kind memakai `emptyDir` (data hilang saat Pod hilang).
-- Package GHCR mungkin private sampai visibility diubah.
-- Image belum ditandatangani.
-- Allowlist Gitleaks hanya dua fingerprint false positive. Secret sungguhan tetap harus menggagalkan CI.
+## Struktur layer backend
 
-## File lokal yang tidak di-commit
+```text
+Handler
+   │
+   ▼
+Service
+   │
+   ▼
+Repository
+   │
+   ▼
+Database
+```
 
-| File | Template |
-| --- | --- |
-| `ecommerce-api/.env` | `.env.example` |
-| `ecommerce-api/apps/web/.env.local` | `.env.example` |
-| `k8s/base/secret.yaml` | `k8s/base/secret.example.yaml` |
-| `infra/terraform/terraform.tfvars` | `terraform.tfvars.example` |
+- Handler menangani HTTP request dan response.
+- Service berisi business logic.
+- Repository menangani akses database.
+- PostgreSQL adalah persistence layer.
 
-Jangan commit secret. State Terraform tetap di mesin lokal.
+Kode layer ada di `ecommerce-api/server/internal/`.
+
+## Lingkup project
+
+Project ini portfolio dan local DevOps/DevSecOps lab, bukan sistem production dengan seluruh komponen enterprise.
+
+Fokusnya software engineering, backend engineering, DevOps, DevSecOps, observability, dan infrastructure as code. PostgreSQL `emptyDir`, TLS lokal, kind, dan EC2 `t3.micro` dipakai untuk lab.
+
+## Catatan deployment
+
+Beberapa konfigurasi ditujukan untuk environment lokal atau lab:
+
+- Kubernetes memakai kind
+- PostgreSQL di kind memakai `emptyDir`
+- TLS memakai sertifikat lokal
+- `DB_SSLMODE=disable` hanya sesuai untuk lab
+- Terraform memakai EC2 berukuran kecil
+- Storefront Next.js belum menjadi service Docker Compose
+- Image GHCR masih memakai namespace `devops-homelab`
+
+Konfigurasi itu perlu disesuaikan jika project ingin dijalankan di environment production.
+
+## Dokumentasi
+
+- [`ecommerce-api/README.md`](./ecommerce-api/README.md)
+- [`ecommerce-api/apps/web/README.md`](./ecommerce-api/apps/web/README.md)
+- [`k8s/README.md`](./k8s/README.md)
+- [`infra/terraform/README.md`](./infra/terraform/README.md)
 
 ## Lisensi
 
