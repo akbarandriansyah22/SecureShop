@@ -1,104 +1,97 @@
-# devops-homelab
+# SecureShop
 
-Homelab DevOps end-to-end untuk API e-commerce berbasis Go: dari kode aplikasi, containerisasi, pipeline CI/CD, cluster Kubernetes lokal, hingga infrastruktur AWS yang dikelola sebagai kode.
+Toko online fullstack: storefront Next.js untuk pembeli dan admin, API Go (Fiber) untuk katalog, keranjang, dan order, plus homelab DevSecOps yang menjalankan aplikasi itu.
 
-Dirancang sebagai bukti praktik DevOps nyata — bukan hanya daftar tool — dengan fokus pada otomasi, observability, dan keputusan desain yang sadar biaya.
+Repo ini tetap `devops-homelab` karena isinya bukan hanya toko. Di dalamnya ada pipeline, observability, cluster Kubernetes lokal, dan lab Terraform AWS. Nama produknya SecureShop, supaya tidak tertukar dengan project fullstack lain.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/akbarandriansyah22/devops-homelab/ci.yml?branch=main&label=CI&logo=github&logoColor=white)](https://github.com/akbarandriansyah22/devops-homelab/actions/workflows/ci.yml)
 [![GHCR](https://img.shields.io/github/actions/workflow/status/akbarandriansyah22/devops-homelab/cd.yml?branch=main&label=GHCR%20publish&logo=docker&logoColor=white)](https://github.com/akbarandriansyah22/devops-homelab/actions/workflows/cd.yml)
-[![Go](https://img.shields.io/badge/Go-1.25.2-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Go](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-## Ringkasan sistem
+## Apa ini
 
-Repositori ini menghubungkan empat lapisan yang biasanya tersebar di lingkungan produksi:
+SecureShop adalah toko online kecil dengan dua peran: customer dan admin.
 
-1. **Aplikasi** — API e-commerce Go (Fiber) dengan PostgreSQL
-2. **Runtime lokal** — Docker Compose plus stack observability (Prometheus, Grafana, Loki)
-3. **Orkestrasi** — manifest Kubernetes untuk cluster kind
-4. **Infrastruktur cloud** — Terraform untuk VPC dan EC2 di AWS (`ap-southeast-1`)
+Customer bisa daftar, login, melihat katalog, mencari produk, mengisi keranjang, checkout, dan melihat order. Admin bisa mengelola produk, kategori, dan status order. Checkout menyimpan `payment_method` yang dipilih di form. Tidak ada payment gateway.
 
-Alur delivery: perubahan kode masuk ke CI (uji dan scan), lalu image dipublikasikan ke GHCR, kemudian dapat dijalankan di Compose atau dimuat ke kind. Infrastruktur AWS diprovision terpisah lewat Terraform (`plan` sebagai default; `apply` bersifat opsional dan berbiaya).
+Storefront tidak memegang JWT di browser. Login menulis cookie `access_token` (`httpOnly`, `SameSite=Lax`, 2 jam). Mutasi cart, order, dan admin lewat BFF di `apps/web` (`app/api/proxy`), yang hanya meneruskan prefix yang di-allowlist dan menolak `Origin` yang bukan same-origin. Role admin (`role_id = 1`) tetap dicek di API.
 
+Dokumentasi storefront: [`ecommerce-api/apps/web/README.md`](./ecommerce-api/apps/web/README.md).
 Dokumentasi API: [`ecommerce-api/README.md`](./ecommerce-api/README.md).
 
-## Skill yang dibuktikan
+## Bukan production
 
-| Area | Yang ditunjukkan di repo ini |
+Ini portofolio / homelab, bukan toko yang siap terima pembayaran sungguhan.
+
+- Tidak ada payment gateway, webhook bayar, atau rekonsiliasi.
+- Katalog tidak ikut ter-seed. Migration awal hanya mengisi role. Produk dan kategori harus dimasukkan sendiri.
+- Storefront belum masuk Docker Compose. `apps/web` dijalankan dengan `npm run dev` di port 3001. Grafana memakai 3000.
+- Image yang dipublish ke GHCR adalah API, bukan storefront.
+- Cluster kind dan Terraform AWS adalah lab. `terraform apply` berbiaya dan tidak dijalankan otomatis.
+
+## Stack
+
+| Lapisan | Teknologi |
 | --- | --- |
-| Backend | API Go (Fiber), konfigurasi lingkungan, health check (`/live`, `/ready`) |
-| Containerisasi | Docker multi-service, Compose, image ke GHCR |
-| CI/CD | GitHub Actions: gate SAST/scan, CD hanya setelah CI hijau |
-| Kubernetes | Manifest kind, secret, NetworkPolicy, Ingress + TLS lab |
-| Infrastructure as Code | Terraform: VPC 2 AZ, security group, EC2 `t3.micro` + EIP |
+| Storefront | Next.js App Router, TypeScript, Tailwind CSS |
+| API | Go 1.26, Fiber, JWT, bcrypt |
+| Data | PostgreSQL 16 |
+| Auth web | Cookie `httpOnly` + BFF proxy, RBAC admin/customer |
+| Runtime lokal | Docker Compose (API, Postgres, observability) |
+| Registry | GHCR, image API |
+| Orkestrasi | kind (Kubernetes lokal) |
+| IaC | Terraform, VPC dan EC2 di `ap-southeast-1` |
+| CI/CD | GitHub Actions: Gitleaks, GoSec, Trivy, npm audit, lalu publish image |
 | Observability | Prometheus, Grafana, Loki, Alertmanager |
-| Engineering judgment | Trade-off biaya (kind vs EKS, tanpa NAT Gateway), batasan cakupan yang eksplisit |
 
 ## Arsitektur
 
 ```text
-                    ┌─────────────────────────┐
-  Developer push    │   GitHub (main)         │
-        │           │   CI, CD, GHCR        │
-        ▼           └───────────┴────────────┘
-┌───────────────┐               │ image
-│ ecommerce-api ├──────────────┘
-│ (Go + Fiber)  │
-└──────┴───────┘
-        │
-   ┌──┴─────┐
-   ▼          ▼
-┌────────┐  ┌──────────────────┐
-│ Compose│  │ kind (local K8s) │
-│ + DB   │  │ manifests di k8s/│
-│ + obs. │  └──────────────────┘
-└────────┘
-        │ opsional
-        ▼
-┌─────────────────────────────┐
-│ AWS (Terraform)              │
-│ VPC 2 AZ · SG · EC2 + EIP    │
-│ wilayah: ap-southeast-1      │
-└─────────────────────────────┘
+Browser
+   │
+   ▼
+┌─────────────────────┐
+│ SecureShop web      │  Next.js :3001
+│ katalog langsung   │
+│ mutasi lewat BFF   │
+└────────┬───────────┘
+         │
+         ▼
+┌─────────────────────┐     image API
+│ SecureShop API      │──────────────┐
+│ Go Fiber :8080     │               │
+└────────┬────────────┘               │
+         │                               │
+    ┌────┴─────┐                          │
+    ▼          ▼                          ▼
+┌────────┐  ┌──────────────────┐     ┌──────────────────┐
+│ Compose │  │ kind (lokal)     │     │ AWS lab        │
+│ API+DB  │  │ manifest di k8s/ │     │ Terraform       │
+│ + obs.  │  └──────────────────┘     │ VPC · EC2 + EIP  │
+└────────┘                            └──────────────────┘
 ```
 
-**Alur singkat**
+Alur delivery: push ke `main` menjalankan CI (uji dan scan). CD mempublikasikan image API ke GHCR hanya setelah CI pada SHA yang sama hijau. Storefront tidak ikut image itu.
 
-1. Developer mengubah kode di `ecommerce-api/`
-2. CI berjalan pada path terkait dan harus hijau (Gitleaks, GoSec high, Trivy HIGH/CRITICAL, npm audit high)
-3. CD mempublikasikan image ke GHCR hanya setelah CI di `main` sukses pada SHA yang sama
-4. Lokal: jalankan via Compose, atau muat image ke cluster kind + Ingress TLS
-5. Cloud: provision jaringan dan mesin uji dengan Terraform (default hanya `plan`)
+## Struktur
 
-## Stack teknologi
-
-| Lapisan | Teknologi |
+| Direktori | Isi |
 | --- | --- |
-| Bahasa & framework | Go 1.25.2, Fiber |
-| Data | PostgreSQL 16 |
-| Container | Docker, Docker Compose |
-| Registry | GitHub Container Registry (GHCR) |
-| Orkestrasi | kind (Kubernetes lokal) |
-| IaC | Terraform |
-| CI/CD | GitHub Actions |
-| Observability | Prometheus, Grafana, Loki, Alertmanager |
-
-## Struktur repositori
-
-| Direktori | Deskripsi |
-| --- | --- |
-| [`ecommerce-api/`](./ecommerce-api) | API Go, Compose, dan stack observability |
-| [`k8s/`](./k8s) | Manifest Kubernetes untuk kind |
+| [`ecommerce-api/apps/web/`](./ecommerce-api/apps/web) | Storefront SecureShop |
+| [`ecommerce-api/server/`](./ecommerce-api/server) | API Go |
+| [`ecommerce-api/`](./ecommerce-api) | Compose, migration, observability |
+| [`k8s/`](./k8s) | Manifest kind |
 | [`infra/terraform/`](./infra/terraform) | VPC dua AZ, security group, EC2 `t3.micro` + EIP |
-| [`.github/workflows/`](./.github/workflows) | Workflow CI dan publikasi image ke GHCR |
+| [`.github/workflows/`](./.github/workflows) | CI dan publikasi image API |
 
-Image: `ghcr.io/akbarandriansyah22/devops-homelab/ecommerce-api` (tag `latest` dan `main-<sha>`).
+Image API: `ghcr.io/akbarandriansyah22/devops-homelab/ecommerce-api` (tag `latest` dan `main-<sha>`).
 
 ## Cara menjalankan
 
-**Prasyarat:** Docker. kind dan Terraform hanya diperlukan untuk bagian masing-masing.
+**Prasyarat:** Docker untuk API. Node.js untuk storefront. kind dan Terraform hanya untuk lab masing-masing.
 
-### 1. API + observability (Docker Compose)
+### 1. API + observability
 
 ```bash
 git clone https://github.com/akbarandriansyah22/devops-homelab.git
@@ -106,7 +99,7 @@ cd devops-homelab/ecommerce-api
 cp .env.example .env
 ```
 
-Lengkapi `DB_PASSWORD`, `JWT_SECRET`, dan `METRICS_TOKEN` (contoh: `openssl rand -hex 32`). Atur `DB_HOST=postgres`.
+Isi `DB_PASSWORD`, `JWT_SECRET`, dan `METRICS_TOKEN` (contoh: `openssl rand -hex 32`). Set `DB_HOST=postgres`.
 
 ```bash
 docker compose up -d --build
@@ -121,11 +114,24 @@ curl -sf http://localhost:8080/ready
 | Prometheus | http://localhost:9090 |
 | Alertmanager | http://localhost:9093 |
 
-Kredensial Grafana tersedia di `ecommerce-api/docker-compose.yml`.
+Kredensial Grafana ada di `ecommerce-api/docker-compose.yml`.
 
-### 2. Cluster kind
+### 2. Storefront
 
-Ikuti [`k8s/README.md`](./k8s/README.md). Jika `docker pull` dari GHCR gagal (`denied`), bangun image secara lokal lalu muat ke cluster dengan `kind load`.
+API harus sudah jalan di `:8080`.
+
+```bash
+cd ecommerce-api/apps/web
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+Buka http://localhost:3001. `API_URL` di `.env.local` mengarah ke `http://localhost:8080`. Registrasi membuat customer (`role_id = 2`). Admin tidak dibuat dari form; ubah `role_id` menjadi `1` di database, lalu login lagi. Detailnya di [`ecommerce-api/apps/web/README.md`](./ecommerce-api/apps/web/README.md).
+
+### 3. Cluster kind
+
+Ikuti [`k8s/README.md`](./k8s/README.md). Jika `docker pull` dari GHCR gagal (`denied`), bangun image secara lokal lalu muat dengan `kind load`.
 
 ```bash
 kind create cluster --name ecommerce --config k8s/kind-config.yaml
@@ -133,11 +139,11 @@ cp k8s/base/secret.example.yaml k8s/base/secret.yaml
 kubectl apply -f k8s/base
 ```
 
-HTTPS lewat Ingress: lihat [`k8s/README.md`](./k8s/README.md) (CA lab + `https://ecommerce.local`). Port-forward `8080` tetap bisa dipakai sebagai fallback.
+HTTPS lewat Ingress: [`k8s/README.md`](./k8s/README.md) (CA lab + `https://ecommerce.local`). Port-forward `8080` tetap bisa dipakai.
 
-### 3. Infrastruktur AWS (Terraform)
+### 4. Lab AWS
 
-Lihat [`infra/terraform/`](./infra/terraform). Perintah default adalah `plan`; resource AWS belum dibuat secara otomatis.
+Default-nya `plan`. `apply` membuat EC2, EBS, dan IP publik, jadi ada biaya.
 
 ```bash
 cd infra/terraform
@@ -147,73 +153,62 @@ terraform validate
 terraform plan
 ```
 
-Perintah `apply` membuat EC2, EBS, dan alamat IP publik — ada biaya. Langkah `destroy` terdokumentasi di README folder tersebut.
-
 ## CI/CD
 
 | Workflow | Pemicu | Fungsi |
 | --- | --- | --- |
-| **CI** — `Go CI + DevSecOps Pipeline` | `ecommerce-api/**`, `k8s/**`, `infra/terraform/**`, atau file workflow | Job terpisah: `secrets`, `go-qa`, `api-image`, `fs-scan`, `web-qa`. HIGH/CRITICAL gagalkan job |
-| **CD** — `Publish image to GHCR` | CI di `main` selesai sukses | Tag `main-<sha>` dan `latest` (lab). Tidak menandatangani image |
+| **CI** — `Go CI + DevSecOps Pipeline` | `ecommerce-api/**`, `k8s/**`, `infra/terraform/**`, atau file workflow | Job terpisah: `secrets`, `go-qa`, `api-image`, `fs-scan`, `web-qa`. HIGH/CRITICAL menggagalkan job |
+| **CD** — `Publish image to GHCR` | CI di `main` sukses | Tag `main-<sha>` dan `latest` untuk image API. Image tidak ditandatangani |
 
-Job CI tidak memakai `if: always()` untuk unggah SARIF. Unggahan hanya terjadi jika file SARIF benar-benar ada. Action dipin ke commit SHA. Gitleaks memakai image resmi yang dipin digest, perintah `gitleaks detect --source . --no-git --verbose --redact`, tanpa `continue-on-error`.
+Job CI tidak memakai `if: always()` untuk unggah SARIF. Action dipin ke commit SHA. Gitleaks memakai image resmi yang dipin digest, tanpa `continue-on-error`.
 
 Dua false positive Gitleaks di-allowlist di [`.gitleaksignore`](./.gitleaksignore), bukan seluruh `.env.example`:
 
 - `ecommerce-api/.env.example` — rule `generic-api-key` pada `JWT_EXPIRATION_HOURS=2`
 - `ecommerce-api/server/internal/config/security_validation_test.go` — JWT dummy unit test
 
-`workflow_dispatch` pada CD tidak mem-publish begitu saja. Input `confirm` harus bernilai `publish`, dan run CI untuk SHA yang sama harus sudah sukses. Cosign keyless tidak dipasang: butuh penyetelan OIDC/GitHub yang belum ada di lab ini, dan tidak ditambah secret baru untuk itu.
+`workflow_dispatch` pada CD tidak mem-publish begitu saja. Input `confirm` harus `publish`, dan CI untuk SHA yang sama harus sudah sukses. Cosign tidak dipasang.
 
-Dependabot mingguan ada di [`.github/dependabot.yml`](./.github/dependabot.yml) (Go module, npm web, Docker API, GitHub Actions) dengan batas PR terbuka kecil. **Dependabot alerts** dan **secret scanning** tidak hidup hanya karena file itu ada. Nyalakan manual di GitHub: Settings → Code security → Dependabot alerts, Dependabot security updates, dan Secret scanning (termasuk push protection jika tersedia di plan repo).
-
-`fs-scan` menjalankan Trivy config pada `infra/terraform` dan `k8s/` (gate HIGH/CRITICAL). Finding yang disengaja untuk lab ada di [`.trivyignore`](./.trivyignore).
+Dependabot mingguan ada di [`.github/dependabot.yml`](./.github/dependabot.yml). Dependabot alerts dan secret scanning tidak hidup hanya karena file itu ada; nyalakan manual di Settings → Code security.
 
 ```bash
 docker pull ghcr.io/akbarandriansyah22/devops-homelab/ecommerce-api:latest
 ```
 
-Jika muncul `denied`, package masih private. Login ke `ghcr.io` atau ubah visibility package.
+Jika muncul `denied`, package masih private.
 
 ## Keputusan desain
 
-Pilihan di bawah dibuat agar lab tetap realistis secara teknis, tetapi hemat biaya:
-
 | Keputusan | Alasan |
 | --- | --- |
-| kind, bukan EKS | Control plane EKS dikenai biaya per jam |
-| EC2 di subnet publik tanpa NAT Gateway | NAT Gateway terlalu mahal untuk skala lab |
-| Image dapat dimuat ke kind tanpa GHCR | Package baru di GHCR bersifat private secara default |
+| kind, bukan EKS | Control plane EKS berbiaya per jam |
+| EC2 di subnet publik, tanpa NAT Gateway | NAT Gateway terlalu mahal untuk lab |
+| Image bisa dimuat ke kind tanpa GHCR | Package GHCR baru private secara default |
+| Storefront di port 3001 | Grafana sudah memakai 3000 |
+| Tidak ada payment gateway | Checkout hanya mencatat metode, supaya tidak mengklaim integrasi yang tidak ada |
 
-**Di luar cakupan saat ini:** EKS, NAT Gateway, RDS, ALB, Helm, public CA / Let's Encrypt.
+Di luar cakupan: EKS, NAT Gateway, RDS, ALB, Helm, public CA, dan pembayaran sungguhan.
 
-## Batasan & rencana berikutnya
+## Batasan
 
-**Batasan**
+- Homelab / demonstrasi. Bukan production-grade dan bukan multi-region.
+- `terraform apply` opsional dan berbiaya. Yang aman dicoba lebih dulu adalah `plan`.
+- `ssh_cidr` dan `allowed_app_cidr` tidak punya default `0.0.0.0/0`. Isi `/32` lewat `terraform.tfvars`.
+- Deployment kind memakai tag `latest`. Postgres di kind memakai `emptyDir` (data hilang saat Pod hilang).
+- Package GHCR mungkin private sampai visibility diubah.
+- Image belum ditandatangani.
+- Allowlist Gitleaks hanya dua fingerprint false positive. Secret sungguhan tetap harus menggagalkan CI.
 
-- Lingkungan ini homelab / demonstrasi. Bukan klaim production-grade, bukan multi-region, dan bukan pengganti kontrol perusahaan
-- `terraform apply` opsional dan berbiaya; yang aman untuk dicoba lebih dulu adalah `plan`
-- `ssh_cidr` dan `allowed_app_cidr` tidak punya default `0.0.0.0/0`. Isi `/32` lewat `terraform.tfvars` (lihat `terraform.tfvars.example`). Egress security group ke `0.0.0.0/0` tetap ada supaya EC2 lab bisa menarik image
-- Deployment kind memakai tag `latest`, Postgres memakai `emptyDir` (data hilang saat Pod hilang). NetworkPolicy API hanya mengizinkan namespace `ingress-nginx`
-- Package GHCR mungkin private hingga visibility diubah
-- Image belum ditandatangani (Cosign tidak dipasang)
-- Allowlist Gitleaks di atas hanya dua fingerprint false positive. Secret sungguhan tetap harus gagalkan CI
-
-**Arah pengembangan (contoh)**
-
-- Remote state Terraform dan modul yang lebih rapi
-- Image signing (Cosign) dan pin digest di Deployment
-- Helm chart atau Kustomize overlay untuk environment
-
-## File konfigurasi lokal
+## File lokal yang tidak di-commit
 
 | File | Template |
 | --- | --- |
 | `ecommerce-api/.env` | `.env.example` |
+| `ecommerce-api/apps/web/.env.local` | `.env.example` |
 | `k8s/base/secret.yaml` | `k8s/base/secret.example.yaml` |
 | `infra/terraform/terraform.tfvars` | `terraform.tfvars.example` |
 
-File state Terraform (`*.tfstate`) hanya disimpan di mesin lokal. Jangan commit secret.
+Jangan commit secret. State Terraform tetap di mesin lokal.
 
 ## Lisensi
 

@@ -1,8 +1,12 @@
-# web
+# SecureShop web
 
-Next.js App Router. Katalog, auth, keranjang, checkout, order customer, dan admin produk/kategori/order.
+Storefront SecureShop. Next.js App Router, TypeScript, Tailwind CSS. Katalog, auth, keranjang, checkout, order customer, dan admin produk/kategori/order.
+
+Ini bagian depan toko, bukan API-nya. API Go ada di `ecommerce-api/server` dan didokumentasikan di [`../README.md`](../README.md). README repo ada di root.
 
 Browser menulis cart, order, dan admin lewat `app/api/proxy/[...path]` (cookie `access_token` → `Authorization: Bearer`). Cookie `httpOnly`, `SameSite=Lax`, `maxAge` 2 jam (sama dengan JWT). Proxy hanya meneruskan prefix `cart`, `cart/items`, `orders`, `admin/products`, `admin/categories`, `admin/orders`; path lain 404. `middleware.ts` mengarahkan `/admin`, `/checkout`, `/orders`, `/account` tanpa cookie ke `/login`. Role admin tetap dicek di layout (`role_id === 1`). `next.config.ts` mengirim `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, dan CSP (`script-src`/`style-src` masih `'unsafe-inline'`). Login, register, logout, dan proxy menolak `Origin` yang bukan same-origin.
+
+Checkout mengirim `payment_method`. Tidak ada payment gateway.
 
 ## Alur uji customer
 
@@ -51,6 +55,8 @@ cd apps/web && npm i && npm run dev
 ```
 
 Dev server: `http://localhost:3001` (Grafana memakai 3000). `API_URL` dibaca server component dari `.env.local` (contoh: `API_URL=http://localhost:8080`). Katalog publik memanggil API itu langsung. Mutasi lewat BFF proxy.
+
+Storefront belum jadi service Compose. Dockerfile di folder ini belum dipakai untuk menjalankan toko.
 
 Role backend: `1` admin, `2` customer. Auth: JWT Bearer.
 
