@@ -106,7 +106,7 @@ jobs:
         run: docker build -t ecommerce-api:ci .
 
       - name: Trivy image scan (SARIF)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0, Trivy 0.69.3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.35.0, Trivy 0.69.3
         with:
           scan-type: image
           image-ref: ecommerce-api:ci
@@ -123,7 +123,7 @@ jobs:
           category: trivy-image
 
       - name: Trivy image gate
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0, Trivy 0.69.3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.35.0, Trivy 0.69.3
         with:
           scan-type: image
           image-ref: ecommerce-api:ci
@@ -132,7 +132,7 @@ jobs:
           exit-code: "1"
 
       - name: Generate SBOM
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0, Trivy 0.69.3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.35.0, Trivy 0.69.3
         with:
           scan-type: fs
           scan-ref: ecommerce-api
@@ -155,7 +155,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Trivy filesystem scan (SARIF)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0, Trivy 0.69.3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.35.0, Trivy 0.69.3
         with:
           scan-type: fs
           scan-ref: ecommerce-api
@@ -172,7 +172,7 @@ jobs:
           category: trivy-fs
 
       - name: Trivy filesystem gate
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0, Trivy 0.69.3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.35.0, Trivy 0.69.3
         with:
           scan-type: fs
           scan-ref: ecommerce-api
@@ -181,7 +181,7 @@ jobs:
           exit-code: "1"
 
       - name: Trivy config (Terraform)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0, Trivy 0.69.3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.35.0, Trivy 0.69.3
         with:
           scan-type: config
           scan-ref: infra/terraform
@@ -190,7 +190,7 @@ jobs:
           trivyignores: .trivyignore
 
       - name: Trivy config (Kubernetes)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0, Trivy 0.69.3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.35.0, Trivy 0.69.3
         with:
           scan-type: config
           scan-ref: k8s
@@ -221,7 +221,7 @@ jobs:
         run: npm audit --audit-level=high
 
       - name: Trivy filesystem (web)
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0, Trivy 0.69.3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.35.0, Trivy 0.69.3
         with:
           scan-type: fs
           scan-ref: ecommerce-api/apps/web
