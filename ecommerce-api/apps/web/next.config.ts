@@ -14,6 +14,7 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   outputFileTracingRoot: path.join(process.cwd()),
   async headers() {
     return [
