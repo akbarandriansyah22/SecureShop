@@ -3,7 +3,7 @@ module github.com/akbarandriansyah22/BackendProject_and_Portofolio/e-commerce-ap
 go 1.26.0
 
 require (
-	github.com/gofiber/fiber/v2 v2.52.11
+	github.com/gofiber/fiber/v2 v2.52.15
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.12.3
