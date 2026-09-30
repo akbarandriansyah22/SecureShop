@@ -1,0 +1,15 @@
+# Lab EC2 sits in a public subnet and has no NAT. Egress 0.0.0.0/0 is how it pulls GHCR and package mirrors.
+AVD-AWS-0104
+
+# Public subnet map_public_ip_on_launch is the lab design (no NAT Gateway).
+AVD-AWS-0164
+
+# Single lab instance. IMDSv2 hop/token requirement is not part of this slice.
+AVD-AWS-0028
+
+# Lab root volume is not encrypted. No customer data store is claimed here.
+AVD-AWS-0131
+
+# Official postgres:16-alpine needs a writable root and its default user. Data stays on emptyDir on purpose.
+AVD-KSV-0014
+AVD-KSV-0118

@@ -17,15 +17,13 @@ variable "instance_type" {
 }
 
 variable "ssh_cidr" {
-  description = "CIDR allowed to SSH (port 22) on sg_app."
+  description = "CIDR allowed to SSH (port 22) on sg_app. Set in terraform.tfvars, for example YOUR_PUBLIC_IP/32. No default."
   type        = string
-  default     = "0.0.0.0/0"
 }
 
 variable "allowed_app_cidr" {
-  description = "CIDR allowed to reach the API (port 8080) on sg_app."
+  description = "CIDR allowed to reach the API (port 8080) on sg_app. Set in terraform.tfvars as a /32. No default."
   type        = string
-  default     = "0.0.0.0/0"
 }
 
 variable "key_name" {

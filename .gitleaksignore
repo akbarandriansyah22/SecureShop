@@ -1,0 +1,4 @@
+# generic-api-key pada JWT_EXPIRATION_HOURS=2. Bukan kredensial.
+ecommerce-api/.env.example:generic-api-key:19
+# JWT dummy di unit test (bukan secret yang dipakai runtime).
+ecommerce-api/server/internal/config/security_validation_test.go:generic-api-key:13
